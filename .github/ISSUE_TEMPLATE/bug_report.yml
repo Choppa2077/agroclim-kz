@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work or a recommendation looks wrong
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the report. Please include the exact command you ran.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and output
+      description: The full command line, its inputs and the output.
+      render: console
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: agroclim version
+      placeholder: "0.1.0 (agroclim --version)"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version and OS
+      placeholder: "3.12 on Ubuntu 24.04"
+    validations:
+      required: true
+  - type: checkboxes
+    id: agronomy
+    attributes:
+      label: Type of problem
+      options:
+        - label: The software crashed or printed an error
+        - label: The recommendation disagrees with agronomic practice

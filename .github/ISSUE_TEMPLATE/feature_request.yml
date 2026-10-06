@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest a new capability or a change to the agronomic model
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What cannot be done today, and who needs it?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Agronomic source
+      description: >
+        If the request changes a constant, a threshold or a crop window, cite the
+        paper or the field trial that supports the new value.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [climate, model, optimizer, nasa_power, cli, docs, ci]
+    validations:
+      required: true

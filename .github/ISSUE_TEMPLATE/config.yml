@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Methodology and sources
+    url: https://github.com/Choppa2077/agroclim-kz/blob/main/docs/methodology.md
+    about: Where every agronomic constant comes from, before opening an issue about one.
+  - name: Contributing guide
+    url: https://github.com/Choppa2077/agroclim-kz/blob/main/CONTRIBUTING.md
+    about: Development setup, branch naming and the commit convention.
