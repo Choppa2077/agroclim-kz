@@ -67,7 +67,7 @@ CROPS: Mapping[str, Crop] = {
 
 #: Yield effect of the preceding crop, relative to a neutral predecessor.
 ROTATION_EFFECT: Mapping[str, float] = {
-    "fallow": 0.35,
+    "fallow": 0.40,
     "legume": 0.11,
     "oilseed": 0.00,
     "cereal": -0.05,
