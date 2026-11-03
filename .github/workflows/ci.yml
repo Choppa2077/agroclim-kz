@@ -80,7 +80,7 @@ jobs:
           python -m agroclim recommend --crop wheat --precipitation 139 --humidity 55 --json
       - name: Publish the coverage report
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-xml
           path: coverage.xml
@@ -102,7 +102,7 @@ jobs:
       - name: Check the metadata
         run: twine check dist/*
       - name: Keep the artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: distribution
           path: dist/*
