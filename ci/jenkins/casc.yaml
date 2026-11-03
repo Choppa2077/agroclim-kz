@@ -1,0 +1,87 @@
+# Jenkins Configuration as Code for agroclim-kz.
+#
+# No secret is written here. Values in ${...} are resolved when Jenkins starts:
+#   JENKINS_ADMIN_ID / JENKINS_ADMIN_PASSWORD  - environment, from ci/jenkins/.env
+#   ${dockerhub_token}                          - Docker secret /run/secrets/dockerhub_token
+#   ${readFileBase64:/run/secrets/kubeconfig}   - Docker secret with the deployer kubeconfig
+# bootstrap.sh creates those files locally; they are git-ignored.
+
+jenkins:
+  systemMessage: >-
+    agroclim-kz CI/CD. This server is configured as code:
+    ci/jenkins/casc.yaml in https://github.com/Choppa2077/agroclim-kz
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          name: "Administrator"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8080/"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "dockerhub"
+              description: "Docker Hub access token of mukan2077 (used only to push images)"
+              username: "mukan2077"
+              password: "${dockerhub_token}"
+          - file:
+              scope: GLOBAL
+              id: "kubeconfig-minikube"
+              description: "kubeconfig of the jenkins-deployer service account (namespace agroclim only)"
+              fileName: "kubeconfig"
+              secretBytes: "${readFileBase64:/run/secrets/kubeconfig}"
+
+jobs:
+  - script: |
+      multibranchPipelineJob('agroclim-kz') {
+        displayName('agroclim-kz')
+        description('CI/CD of https://github.com/Choppa2077/agroclim-kz. ' +
+                    'Every branch with a Jenkinsfile is built; the pipeline itself lives in the repository.')
+        branchSources {
+          branchSource {
+            source {
+              git {
+                id('agroclim-kz-github')
+                remote('https://github.com/Choppa2077/agroclim-kz.git')
+                traits {
+                  gitBranchDiscovery()
+                  headWildcardFilter {
+                    includes('main feat/* fix/* docs/* ci/* demo/*')
+                    excludes('')
+                  }
+                }
+              }
+            }
+          }
+        }
+        factory {
+          workflowBranchProjectFactory {
+            scriptPath('Jenkinsfile')
+          }
+        }
+        // Jenkins runs on a laptop behind NAT, so GitHub webhooks cannot reach it.
+        // The repository is scanned every minute instead and new commits start builds.
+        triggers {
+          periodicFolderTrigger {
+            interval('1m')
+          }
+        }
+        orphanedItemStrategy {
+          discardOldItems {
+            numToKeep(5)
+          }
+        }
+      }

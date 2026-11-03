@@ -1,0 +1,67 @@
+# Local Jenkins for agroclim-kz.
+#
+# Follows the official "Installing Jenkins in Docker" guide: the controller talks to
+# a docker:dind sidecar over TLS instead of the host's Docker socket, so a build
+# cannot touch the other containers on this machine.
+#
+#   ./bootstrap.sh            # first start (creates .env and secrets/, then runs compose)
+#   docker compose up -d      # later starts
+#   docker compose down       # stop (volumes keep the build history)
+name: agroclim-ci
+
+services:
+  docker:
+    image: docker:29.9.2-dind
+    container_name: agroclim-ci-docker
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - docker-certs:/certs/client
+      # Docker agents mount the workspace by path, so the daemon needs the same volume.
+      - jenkins-home:/var/jenkins_home
+      - docker-data:/var/lib/docker
+    networks:
+      jenkins:
+        aliases: [docker]
+    restart: unless-stopped
+
+  jenkins:
+    build: .
+    image: agroclim-ci-jenkins:2.580.2
+    container_name: agroclim-ci-jenkins
+    depends_on: [docker]
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: "1"
+      JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID:-admin}
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?run ./bootstrap.sh first}
+    ports:
+      - "127.0.0.1:8080:8080"   # reachable from this machine only
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - docker-certs:/certs/client:ro
+    secrets:
+      - dockerhub_token
+      - kubeconfig
+    networks:
+      - jenkins
+      - minikube
+    restart: unless-stopped
+
+networks:
+  jenkins: {}
+  minikube:
+    external: true   # created by `minikube start --driver=docker`
+
+volumes:
+  jenkins-home: {}
+  docker-certs: {}
+  docker-data: {}
+
+secrets:
+  dockerhub_token:
+    file: ./secrets/dockerhub_token
+  kubeconfig:
+    file: ./secrets/kubeconfig
