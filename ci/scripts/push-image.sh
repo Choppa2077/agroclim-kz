@@ -28,9 +28,20 @@ export BUILDX_CONFIG="${BUILDX_CONFIG:-${HOME}/.docker/buildx}"
 trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
 printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USER" --password-stdin
 
+# buildx refuses to create a builder from DOCKER_HOST + TLS variables, which is how
+# Jenkins reaches its docker:dind sidecar, so describe that daemon as a context.
+# The context lives in the throw-away config too and is recreated on every run.
+endpoint="default"
+if [ -n "${DOCKER_HOST:-}" ] && [ -n "${DOCKER_CERT_PATH:-}" ]; then
+  endpoint="agroclim-dind"
+  docker context create "$endpoint" --docker \
+    "host=${DOCKER_HOST},ca=${DOCKER_CERT_PATH}/ca.pem,cert=${DOCKER_CERT_PATH}/cert.pem,key=${DOCKER_CERT_PATH}/key.pem" \
+    >/dev/null
+fi
+
 builder="agroclim-multiarch"
 if ! docker buildx inspect "$builder" >/dev/null 2>&1; then
-  docker buildx create --name "$builder" --driver docker-container >/dev/null
+  docker buildx create --name "$builder" --driver docker-container "$endpoint" >/dev/null
 fi
 
 tag_args=()
