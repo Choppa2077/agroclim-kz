@@ -6,7 +6,7 @@ authors:
   - family-names: Idrissov
     given-names: Mukan
     affiliation: Astana IT University
-version: 0.2.0
+version: 0.2.1
 date-released: "2026-11-03"
 license: MIT
 repository-code: "https://github.com/Choppa2077/agroclim-kz"
