@@ -88,7 +88,8 @@ pipeline {
         }
         stage('Package (wheel + sdist)') {
           steps {
-            sh 'python -m build --outdir dist . && python -m twine check --strict dist/*'
+            // hatchling is pinned in the CI image, so no package index is needed here
+            sh 'python -m build --no-isolation --outdir dist . && python -m twine check --strict dist/*'
           }
           post {
             success {

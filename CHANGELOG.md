@@ -11,6 +11,17 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Seasonal weather forecasts instead of climatological averages (#1).
 - Publication of the package on PyPI (#3).
 
+## [0.2.1] - 2026-11-03
+
+### Fixed
+- Jenkins: the multi-arch push reaches the `docker:dind` daemon through a Docker context.
+  `buildx` cannot create a builder from `DOCKER_HOST` and TLS variables, which stopped
+  the first `main` build of 0.2.0 before the image was pushed.
+
+### Changed
+- Jenkins builds the wheel and the sdist without network access: the build backend
+  (`hatchling`) is pinned in the CI image.
+
 ## [0.2.0] - 2026-11-03
 
 ### Added
@@ -43,6 +54,7 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Continuous integration: ruff, mypy, pytest on Python 3.10-3.12, coverage gate and package build.
 - Continuous delivery: tagged releases publish the built artifacts to GitHub Releases.
 
-[Unreleased]: https://github.com/Choppa2077/agroclim-kz/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Choppa2077/agroclim-kz/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Choppa2077/agroclim-kz/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Choppa2077/agroclim-kz/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Choppa2077/agroclim-kz/releases/tag/v0.1.0

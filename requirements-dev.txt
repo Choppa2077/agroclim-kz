@@ -26,6 +26,8 @@ docutils==0.23
     # via readme-renderer
 fonttools==4.68.0
     # via matplotlib
+hatchling==1.33.0
+    # via agroclim (pyproject.toml)
 id==1.6.1
     # via twine
 idna==3.20
@@ -71,15 +73,19 @@ numpy==2.5.4
 packaging==26.3
     # via
     #   build
+    #   hatchling
     #   matplotlib
     #   pytest
     #   twine
 pathspec==1.1.1
-    # via mypy
+    # via
+    #   hatchling
+    #   mypy
 pillow==13.0.0
     # via matplotlib
 pluggy==1.7.0
     # via
+    #   hatchling
     #   pytest
     #   pytest-cov
 pycparser==3.12 ; implementation_name != 'PyPy' and platform_machine != 'ppc64le' and platform_machine != 's390x' and platform_python_implementation != 'PyPy' and sys_platform == 'linux'
@@ -119,6 +125,10 @@ ruff==0.17.3
     # via agroclim (pyproject.toml)
 secretstorage==3.5.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x' and sys_platform == 'linux'
     # via keyring
+tomlkit==0.15.2
+    # via hatchling
+trove-classifiers==2026.9.21.13
+    # via hatchling
 twine==7.0.0
     # via agroclim (pyproject.toml)
 typing-extensions==4.16.0
