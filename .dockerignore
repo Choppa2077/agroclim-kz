@@ -1,0 +1,30 @@
+# Only pyproject.toml, README.md, LICENSE, src/ and requirements-dev.txt are
+# needed to build the image; everything else stays out of the build context.
+.git
+.github
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+.coverage.*
+coverage.xml
+htmlcov
+reports
+dist
+build
+*.egg-info
+.home
+.deploy
+.DS_Store
+ci
+deploy
+docs
+examples
+tests
+Jenkinsfile
+Dockerfile
+.dockerignore
