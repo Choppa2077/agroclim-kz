@@ -91,6 +91,21 @@ recommendation = recommend_sowing_date("wheat", conditions, year=2027)
 print(recommendation.summary())
 ```
 
+Serve the recommender as a JSON API for the platform back end:
+
+```console
+$ agroclim serve --port 8000
+$ curl "http://localhost:8000/recommend?crop=wheat&precipitation=139&humidity=55&year=2027"
+{"crop": "wheat", "year": 2027, "sowing_date": "2027-05-15", "day_of_year": 135, ...}
+```
+
+Or run everything in a container — no Python needed on the host:
+
+```console
+$ docker run --rm mukan2077/agroclim-kz recommend --crop wheat --precipitation 139 --humidity 55
+$ docker run --rm -p 8000:8000 mukan2077/agroclim-kz          # the JSON API
+```
+
 ## How the recommendation is computed
 
 ```
@@ -135,11 +150,16 @@ demo and the tests; it is not observational data. Real series come from
 ## Project layout
 
 ```
-src/agroclim/      climate.py  model.py  optimizer.py  nasa_power.py  cli.py  plotting.py
-tests/             unit tests for every module, including an offline API test
-docs/              methodology and its references
+src/agroclim/      climate.py  model.py  optimizer.py  nasa_power.py  cli.py  plotting.py  service.py
+tests/             unit tests for every module, including offline API and HTTP tests
+docs/              methodology, DevOps set-up and their references
 examples/          a synthetic sample season
-.github/workflows/ ci.yml (lint, types, tests, build) and release.yml (tagged releases)
+Dockerfile         multi-stage image: build, pinned CI toolchain, non-root runtime
+Jenkinsfile        the CI/CD pipeline run by Jenkins
+ci/jenkins/        Jenkins server configured as code (JCasC, Job DSL, docker:dind)
+ci/scripts/        smoke test, push, deploy, verify and rollback scripts
+deploy/            Kubernetes manifests and the least-privilege deployer account
+.github/workflows/ ci.yml (lint, types, tests, build, image) and release.yml (tagged releases)
 ```
 
 ## Development
@@ -168,10 +188,20 @@ Every push and pull request runs
 3. **test** — `pytest` on Python 3.10, 3.11 and 3.12 (Ubuntu) and 3.12 on Windows,
    with a coverage gate of 85 %;
 4. **build** — `python -m build` plus `twine check` on the produced wheel and sdist;
-5. **ci-ok** — a single gate job that branch protection can require.
+5. **image** — builds the container image and runs [`ci/scripts/smoke-test-image.sh`](ci/scripts/smoke-test-image.sh);
+6. **ci-ok** — a single gate job that branch protection can require.
 
 Pushing a tag `v*` runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
 which rebuilds the artifacts and attaches them to a GitHub Release.
+
+A self-hosted **Jenkins** pipeline ([`Jenkinsfile`](Jenkinsfile)) builds every
+branch: lint and types in parallel, tests with JUnit and coverage reports, the
+package, the container image and its smoke test. Commits on `main` are also
+pushed to [Docker Hub](https://hub.docker.com/r/mukan2077/agroclim-kz) for
+amd64 and arm64, deployed to Kubernetes and checked live, with an automatic
+rollback when the check fails. The Jenkins server itself is configured as code
+in [`ci/jenkins/`](ci/jenkins/). Set-up, design decisions and limitations:
+[`docs/devops.md`](docs/devops.md).
 
 ## Roadmap
 

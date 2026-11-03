@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import socket
+import sys
 
 import pytest
 
@@ -170,6 +172,30 @@ def test_fetch_rejects_a_bad_date() -> None:
                 "x.csv",
             ]
         )
+
+
+def test_serve_passes_host_and_port(monkeypatch) -> None:
+    from agroclim import cli
+
+    calls: list[tuple[str, int]] = []
+
+    def fake_serve(host: str, port: int) -> int:
+        calls.append((host, port))
+        return 0
+
+    monkeypatch.setattr(cli, "serve", fake_serve)
+    assert main(["serve", "--host", "0.0.0.0", "--port", "9000"]) == 0
+    assert calls == [("0.0.0.0", 9000)]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="SO_REUSEADDR semantics differ on Windows")
+def test_serve_reports_a_busy_port(capsys) -> None:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as busy:
+        busy.bind(("127.0.0.1", 0))
+        busy.listen()
+        port = busy.getsockname()[1]
+        assert main(["serve", "--port", str(port)]) == 2
+    assert "error" in capsys.readouterr().err
 
 
 def test_version_flag(capsys) -> None:

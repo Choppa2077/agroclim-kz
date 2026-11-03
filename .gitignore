@@ -26,3 +26,8 @@ weather.csv
 .idea/
 .vscode/
 .DS_Store
+
+# Pipeline and deployment scratch directories
+.deploy/
+reports/
+.home/

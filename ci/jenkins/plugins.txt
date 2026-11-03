@@ -1,0 +1,14 @@
+# Plugins of the agroclim-kz Jenkins; dependencies are resolved by jenkins-plugin-cli.
+configuration-as-code
+job-dsl
+workflow-aggregator
+workflow-multibranch
+git
+docker-workflow
+credentials-binding
+junit
+coverage
+timestamper
+ws-cleanup
+pipeline-stage-view
+pipeline-graph-view

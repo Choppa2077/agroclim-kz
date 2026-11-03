@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from collections.abc import Sequence
 from datetime import date, datetime
@@ -13,6 +14,7 @@ from agroclim.climate import load_daily_csv, summarise_season, write_daily_csv
 from agroclim.model import CROPS, FieldConditions, explain_yield
 from agroclim.nasa_power import PowerAPIError, fetch_daily
 from agroclim.optimizer import recommend_sowing_date
+from agroclim.service import serve
 
 __all__ = ["build_parser", "main"]
 
@@ -83,6 +85,14 @@ def build_parser() -> argparse.ArgumentParser:
     fetch.add_argument("--start", type=_iso_date, required=True)
     fetch.add_argument("--end", type=_iso_date, required=True)
     fetch.add_argument("--out", required=True, help="CSV file to write")
+
+    serve_cmd = sub.add_parser("serve", help="run the JSON HTTP API (used by the container image)")
+    serve_cmd.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="interface to bind (default: 127.0.0.1; use 0.0.0.0 inside a container)",
+    )
+    serve_cmd.add_argument("--port", type=int, default=8000, help="TCP port (default: 8000)")
     return parser
 
 
@@ -144,6 +154,15 @@ def _run_fetch(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_serve(args: argparse.Namespace) -> int:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        stream=sys.stderr,
+    )
+    return serve(args.host, args.port)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point of the ``agroclim`` command. Returns the process exit code."""
     parser = build_parser()
@@ -152,6 +171,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "features": _run_features,
         "recommend": _run_recommend,
         "fetch": _run_fetch,
+        "serve": _run_serve,
     }
     try:
         return handlers[args.command](args)

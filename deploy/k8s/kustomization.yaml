@@ -1,0 +1,17 @@
+# The agroclim API in Kubernetes: `kubectl apply -k deploy/k8s`.
+# The pipeline does not edit these files: ci/scripts/deploy.sh puts a tiny overlay
+# on top that pins the image to the immutable tag of the commit being deployed.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: agroclim
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: agroclim
+      app.kubernetes.io/managed-by: jenkins
+resources:
+  - deployment.yaml
+  - service.yaml
+images:
+  - name: agroclim-kz
+    newName: docker.io/mukan2077/agroclim-kz
+    newTag: latest
