@@ -12,3 +12,23 @@ updates:
       interval: monthly
     commit-message:
       prefix: build
+  # Base image of the project Dockerfile (pinned by digest).
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+  # Jenkins controller image and its docker:dind sidecar.
+  - package-ecosystem: docker
+    directory: "/ci/jenkins"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+  - package-ecosystem: docker-compose
+    directory: "/ci/jenkins"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
