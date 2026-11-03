@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://docs.astral.sh/ruff/)
+[![Docker Hub](https://img.shields.io/docker/v/mukan2077/agroclim-kz?sort=semver&label=docker%20hub)](https://hub.docker.com/r/mukan2077/agroclim-kz)
 
 Planting-date decision support for rainfed crops in Northern Kazakhstan.
 
