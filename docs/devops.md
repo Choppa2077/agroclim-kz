@@ -99,6 +99,12 @@ Design decisions:
 - **Tests run in the pinned toolchain.** The quality-gate stages run inside the
   `ci` stage of the project Dockerfile, so Jenkins, a laptop and a reviewer use
   the same versions of Python, ruff, mypy and pytest.
+- **The package builds offline.** The build backend (hatchling) is pinned in
+  the CI image and Jenkins runs `python -m build --no-isolation`, so the stage
+  needs no package index (it took 100 s on a slow connection before, 2 s now).
+- **buildx talks to the sidecar through a Docker context.** buildx cannot create
+  a builder from `DOCKER_HOST` and TLS variables, so `ci/scripts/push-image.sh`
+  registers the `docker:dind` daemon as a context in a throw-away config first.
 
 ## Pipeline stages
 
@@ -115,7 +121,8 @@ Design decisions:
 | Verify deployment | `main` | the live service is unhealthy, has the wrong version or a wrong answer → rollback |
 
 Image tags: every `main` build pushes `sha-<12-char commit>` (immutable) and
-`latest`; a commit tagged `vX.Y.Z` also gets `X.Y.Z`. The cluster always runs
+`latest`; a commit tagged `vX.Y.Z` also gets `X.Y.Z`. The images are public at
+[hub.docker.com/r/mukan2077/agroclim-kz](https://hub.docker.com/r/mukan2077/agroclim-kz/tags). The cluster always runs
 an immutable `sha-` tag, so `kubectl rollout history` maps every revision to a
 commit and a Jenkins build.
 
