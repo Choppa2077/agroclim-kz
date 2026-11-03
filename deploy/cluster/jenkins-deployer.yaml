@@ -1,0 +1,65 @@
+# Applied once by a cluster administrator (ci/jenkins/bootstrap.sh), never by Jenkins.
+#
+# Jenkins gets a service account that can only manage the agroclim workload in its
+# own namespace: it cannot read secrets, create namespaces or touch anything else
+# in the cluster. The namespace enforces the "restricted" Pod Security Standard.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agroclim
+  labels:
+    app.kubernetes.io/part-of: agroclim
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-deployer
+  namespace: agroclim
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jenkins-deployer-token
+  namespace: agroclim
+  annotations:
+    kubernetes.io/service-account.name: jenkins-deployer
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agroclim-deployer
+  namespace: agroclim
+rules:
+  # apply the manifests, follow and undo rollouts
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # inspect what is running
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events"]
+    verbs: ["get", "list", "watch"]
+  # smoke-test the live service from inside a pod (exec uses GET over WebSockets)
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-deployer
+  namespace: agroclim
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-deployer
+    namespace: agroclim
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: agroclim-deployer
