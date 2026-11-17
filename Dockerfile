@@ -16,7 +16,7 @@
 # Every stage uses the same base image, pinned by digest so that a rebuild gets
 # the same bits; Dependabot proposes digest updates (.github/dependabot.yml).
 
-FROM --platform=$BUILDPLATFORM python:3.12-slim-trixie@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS build
+FROM --platform=$BUILDPLATFORM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS build
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_ROOT_USER_ACTION=ignore
@@ -28,7 +28,7 @@ RUN python -m pip wheel --no-deps --wheel-dir /dist . \
  && mkdir -p /data
 
 
-FROM python:3.12-slim-trixie@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS ci
+FROM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS ci
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_ROOT_USER_ACTION=ignore \
@@ -39,7 +39,7 @@ RUN python -m pip install -r /tmp/requirements-dev.txt \
  && rm /tmp/requirements-dev.txt
 
 
-FROM python:3.12-slim-trixie@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS runtime
+FROM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS runtime
 ARG VERSION=dev
 ARG REVISION=unknown
 ARG CREATED=unknown
